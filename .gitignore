@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Native/build output
+build/
+dist/
+*.egg-info/
+*.so
+
+# Runtime output
+checkpoints/
+datasets/
+runs/
+videos/
+outputs/
+*.log
+*.pid
+MUJOCO_LOG.TXT
+
+# Large model/data artifacts
+*.safetensors
+*.pt
+*.pth
+*.npz
+*.mp4
+
+# Local environment
+.env
+.DS_Store
+
