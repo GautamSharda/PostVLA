@@ -1,0 +1,19 @@
+[project]
+name = "postvla"
+version = "0.1.0"
+description = "Reproducible SO100 OpenPI pi0.5 post-training experiments"
+requires-python = ">=3.11"
+dependencies = [
+  "gymnasium",
+  "imageio[ffmpeg]",
+  "mujoco",
+  "numpy",
+  "omegaconf",
+  "pillow",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

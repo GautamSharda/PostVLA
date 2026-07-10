@@ -1,0 +1,333 @@
+{
+  "checkpoint": "/network_volume/rlinf_checkpoints/pi05_so100_sim_sft_7999_torch_lorafold_jaxteacher_cubevar20_900_tail2_e3",
+  "manifest": "/network_volume/rollout_captures/contact_physics_oracle/cubevar_contact_40/manifest.json",
+  "attempts": 20,
+  "broad_on_pad": 13,
+  "strict_center_lift": 9,
+  "broad_rate": 0.65,
+  "strict_rate": 0.45,
+  "elapsed_s": 1314.264,
+  "results": [
+    {
+      "attempt": 0,
+      "episode_id": 0,
+      "initial_cube_xyz": [
+        -0.18,
+        -0.36,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": false,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.07926438748836517,
+      "cube_target_xy_distance": 0.28843680024147034,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_000.mp4",
+      "wall_s": 84.7
+    },
+    {
+      "attempt": 1,
+      "episode_id": 1,
+      "initial_cube_xyz": [
+        -0.18,
+        -0.335,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.15370765328407288,
+      "cube_target_xy_distance": 0.035209592431783676,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_001.mp4",
+      "wall_s": 84.81
+    },
+    {
+      "attempt": 2,
+      "episode_id": 2,
+      "initial_cube_xyz": [
+        -0.18,
+        -0.31,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": false,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.14325134456157684,
+      "cube_target_xy_distance": 0.31107690930366516,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_002.mp4",
+      "wall_s": 82.984
+    },
+    {
+      "attempt": 3,
+      "episode_id": 3,
+      "initial_cube_xyz": [
+        -0.18,
+        -0.285,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": false,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.08143827319145203,
+      "cube_target_xy_distance": 0.31986790895462036,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_003.mp4",
+      "wall_s": 83.796
+    },
+    {
+      "attempt": 4,
+      "episode_id": 4,
+      "initial_cube_xyz": [
+        -0.18,
+        -0.26,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": false,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.08311642706394196,
+      "cube_target_xy_distance": 0.30868542194366455,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_004.mp4",
+      "wall_s": 87.374
+    },
+    {
+      "attempt": 5,
+      "episode_id": 5,
+      "initial_cube_xyz": [
+        -0.165,
+        -0.36,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": false,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.08115843683481216,
+      "cube_target_xy_distance": 0.2751423716545105,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_005.mp4",
+      "wall_s": 84.193
+    },
+    {
+      "attempt": 6,
+      "episode_id": 6,
+      "initial_cube_xyz": [
+        -0.165,
+        -0.335,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.15749765932559967,
+      "cube_target_xy_distance": 0.043111905455589294,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_006.mp4",
+      "wall_s": 86.774
+    },
+    {
+      "attempt": 7,
+      "episode_id": 7,
+      "initial_cube_xyz": [
+        -0.165,
+        -0.31,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": false,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.13754934072494507,
+      "cube_target_xy_distance": 0.2848542332649231,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_007.mp4",
+      "wall_s": 86.918
+    },
+    {
+      "attempt": 8,
+      "episode_id": 8,
+      "initial_cube_xyz": [
+        -0.165,
+        -0.285,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.14872083067893982,
+      "cube_target_xy_distance": 0.01661614328622818,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_008.mp4",
+      "wall_s": 89.824
+    },
+    {
+      "attempt": 9,
+      "episode_id": 9,
+      "initial_cube_xyz": [
+        -0.165,
+        -0.26,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.16490356624126434,
+      "cube_target_xy_distance": 0.06069865822792053,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_009.mp4",
+      "wall_s": 91.279
+    },
+    {
+      "attempt": 10,
+      "episode_id": 10,
+      "initial_cube_xyz": [
+        -0.15,
+        -0.36,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.12491672486066818,
+      "cube_target_xy_distance": 0.031981438398361206,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_010.mp4",
+      "wall_s": 88.549
+    },
+    {
+      "attempt": 11,
+      "episode_id": 11,
+      "initial_cube_xyz": [
+        -0.15,
+        -0.335,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.15315015614032745,
+      "cube_target_xy_distance": 0.03622841835021973,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_011.mp4",
+      "wall_s": 86.457
+    },
+    {
+      "attempt": 12,
+      "episode_id": 12,
+      "initial_cube_xyz": [
+        -0.15,
+        -0.31,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.14250952005386353,
+      "cube_target_xy_distance": 0.024849411100149155,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_012.mp4",
+      "wall_s": 86.061
+    },
+    {
+      "attempt": 13,
+      "episode_id": 13,
+      "initial_cube_xyz": [
+        -0.15,
+        -0.285,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.1425185650587082,
+      "cube_target_xy_distance": 0.02005866914987564,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_013.mp4",
+      "wall_s": 85.491
+    },
+    {
+      "attempt": 14,
+      "episode_id": 14,
+      "initial_cube_xyz": [
+        -0.15,
+        -0.26,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.1712566316127777,
+      "cube_target_xy_distance": 0.08332712203264236,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_014.mp4",
+      "wall_s": 85.893
+    },
+    {
+      "attempt": 15,
+      "episode_id": 15,
+      "initial_cube_xyz": [
+        -0.135,
+        -0.36,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.12705451250076294,
+      "cube_target_xy_distance": 0.023057039827108383,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_015.mp4",
+      "wall_s": 88.377
+    },
+    {
+      "attempt": 16,
+      "episode_id": 16,
+      "initial_cube_xyz": [
+        -0.135,
+        -0.335,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": false,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.08271351456642151,
+      "cube_target_xy_distance": 0.2329648733139038,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_016.mp4",
+      "wall_s": 87.695
+    },
+    {
+      "attempt": 17,
+      "episode_id": 17,
+      "initial_cube_xyz": [
+        -0.135,
+        -0.31,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.1566026657819748,
+      "cube_target_xy_distance": 0.015108310617506504,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_017.mp4",
+      "wall_s": 87.585
+    },
+    {
+      "attempt": 18,
+      "episode_id": 18,
+      "initial_cube_xyz": [
+        -0.135,
+        -0.285,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.1642899066209793,
+      "cube_target_xy_distance": 0.010797498747706413,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_018.mp4",
+      "wall_s": 87.985
+    },
+    {
+      "attempt": 19,
+      "episode_id": 19,
+      "initial_cube_xyz": [
+        -0.135,
+        -0.26,
+        0.078
+      ],
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.15446604788303375,
+      "cube_target_xy_distance": 0.012689908035099506,
+      "video": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos/videos/attempt_019.mp4",
+      "wall_s": 90.868
+    }
+  ],
+  "output_dir": "/network_volume/rlinf_eval/jaxteacher_cubevar20_900_tail2_e3_eval20_videos"
+}

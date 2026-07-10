@@ -1,0 +1,61 @@
+{
+  "kind": "jax_teacher_cubevar20_900_tail2_sft_calibration",
+  "source": "/network_volume/rlinf_checkpoints/pi05_so100_sim_sft_7999_torch_lorafold",
+  "target": "/network_volume/rlinf_checkpoints/pi05_so100_sim_sft_7999_torch_lorafold_jaxteacher_cubevar20_900_tail2_e3",
+  "dataset": "/network_volume/rlinf_eval/jax_teacher_calib_dataset_cubevar20_900",
+  "epochs": 3,
+  "batch_size": 4,
+  "lr_layer": 1e-05,
+  "lr_head": 5e-05,
+  "samples": 1140,
+  "train_samples": 1026,
+  "val_samples": 114,
+  "base_val_loss": 0.057646984973087394,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.044575714546070955,
+      "val_loss": 0.03553325404284586,
+      "wall_s": 121.227
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.04094351396206513,
+      "val_loss": 0.035913579165935516,
+      "wall_s": 121.257
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.040575553525369686,
+      "val_loss": 0.03937171916637955,
+      "wall_s": 121.418
+    }
+  ],
+  "elapsed_s": 364.181,
+  "train_tensors": 30,
+  "train_names_sample": [
+    "paligemma_with_expert.gemma_expert.model.layers.16.self_attn.q_proj.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.16.self_attn.k_proj.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.16.self_attn.v_proj.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.16.self_attn.o_proj.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.16.mlp.gate_proj.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.16.mlp.up_proj.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.16.mlp.down_proj.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.16.input_layernorm.dense.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.16.input_layernorm.dense.bias",
+    "paligemma_with_expert.gemma_expert.model.layers.16.post_attention_layernorm.dense.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.16.post_attention_layernorm.dense.bias",
+    "paligemma_with_expert.gemma_expert.model.layers.17.self_attn.q_proj.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.17.self_attn.k_proj.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.17.self_attn.v_proj.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.17.self_attn.o_proj.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.17.mlp.gate_proj.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.17.mlp.up_proj.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.17.mlp.down_proj.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.17.input_layernorm.dense.weight",
+    "paligemma_with_expert.gemma_expert.model.layers.17.input_layernorm.dense.bias"
+  ],
+  "saved": true,
+  "model_safetensors": "/network_volume/rlinf_checkpoints/pi05_so100_sim_sft_7999_torch_lorafold_jaxteacher_cubevar20_900_tail2_e3/model.safetensors",
+  "final_val_loss": 0.03937171916637955
+}

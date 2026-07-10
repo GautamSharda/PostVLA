@@ -1,0 +1,126 @@
+{
+  "task": "SO100 MuJoCo pick up the blue cube and place it on the pink pad",
+  "metrics": {
+    "on_pad": "Cube was on the pad at least once during the rollout.",
+    "pad_center_3cm_lift": "Cube was lifted above the threshold and later came within 3 cm of pad center."
+  },
+  "evaluation": {
+    "max_steps": 900,
+    "control_fps": 30,
+    "cube_positions": 40,
+    "seed": 0,
+    "paired_n100_episode_order": true
+  },
+  "experiments": [
+    {
+      "id": "sft_gaussian_ode_n100",
+      "model": "distilled_torch_sft",
+      "ppo_iterations_from_sft": 0,
+      "sampling_mode": "deterministic_ode",
+      "initial_latent": "fresh_unit_gaussian",
+      "attempts": 100,
+      "on_pad": 69,
+      "pad_center_3cm_lift": 53,
+      "raw": "raw/sft_distilled_gaussian_ode_n100.json"
+    },
+    {
+      "id": "rl_stage1_gaussian_ode_n100",
+      "model": "rl_stage1_liftboost_step5",
+      "ppo_iterations_from_sft": 5,
+      "sampling_mode": "deterministic_ode",
+      "initial_latent": "fresh_unit_gaussian",
+      "attempts": 100,
+      "on_pad": 64,
+      "pad_center_3cm_lift": 55,
+      "raw": "raw/rl_stage1_gaussian_ode_n100.json"
+    },
+    {
+      "id": "rl_stage2_gaussian_ode_n100_batch20",
+      "model": "rl_stage2_picklift_repair_step5",
+      "ppo_iterations_from_sft": 10,
+      "sampling_mode": "deterministic_ode",
+      "initial_latent": "fresh_unit_gaussian",
+      "attempts": 100,
+      "on_pad": 70,
+      "pad_center_3cm_lift": 55,
+      "raw": "raw/rl_stage2_gaussian_ode_n100_b20.json"
+    },
+    {
+      "id": "rl_stage2_gaussian_ode_n100_batch1",
+      "model": "rl_stage2_picklift_repair_step5",
+      "ppo_iterations_from_sft": 10,
+      "sampling_mode": "deterministic_ode",
+      "initial_latent": "fresh_unit_gaussian",
+      "attempts": 100,
+      "on_pad": 70,
+      "pad_center_3cm_lift": 52,
+      "raw": "raw/rl_stage2_gaussian_ode_n100_b1.json"
+    },
+    {
+      "id": "rl_stage2_zero_ode_n100",
+      "model": "rl_stage2_picklift_repair_step5",
+      "ppo_iterations_from_sft": 10,
+      "sampling_mode": "deterministic_ode",
+      "initial_latent": "zeros",
+      "attempts": 100,
+      "on_pad": 90,
+      "pad_center_3cm_lift": 82,
+      "raw": "raw/rl_stage2_zero_ode_n100.json"
+    },
+    {
+      "id": "rl_stage2_stochastic_flow_noise_n20",
+      "model": "rl_stage2_picklift_repair_step5",
+      "ppo_iterations_from_sft": 10,
+      "sampling_mode": "stochastic_flow_noise",
+      "initial_latent": "unit_gaussian",
+      "attempts": 20,
+      "on_pad": 13,
+      "pad_center_3cm_lift": 10,
+      "raw": "raw/rl_stage2_stochastic_flow_noise_n20.json"
+    },
+    {
+      "id": "rl_stage2_fixed_gaussian_1p0_ode_n20",
+      "model": "rl_stage2_picklift_repair_step5",
+      "ppo_iterations_from_sft": 10,
+      "sampling_mode": "deterministic_ode",
+      "initial_latent": "fixed_unit_gaussian",
+      "attempts": 20,
+      "on_pad": 8,
+      "pad_center_3cm_lift": 7,
+      "raw": "raw/rl_stage2_fixed_gaussian_1p0_ode_n20.json"
+    },
+    {
+      "id": "rl_stage2_fixed_gaussian_0p5_ode_n20",
+      "model": "rl_stage2_picklift_repair_step5",
+      "ppo_iterations_from_sft": 10,
+      "sampling_mode": "deterministic_ode",
+      "initial_latent": "fixed_gaussian_scale_0.5",
+      "attempts": 20,
+      "on_pad": 18,
+      "pad_center_3cm_lift": 18,
+      "raw": "raw/rl_stage2_fixed_gaussian_0p5_ode_n20.json"
+    },
+    {
+      "id": "rl_stage2_fresh_gaussian_0p5_ode_n20",
+      "model": "rl_stage2_picklift_repair_step5",
+      "ppo_iterations_from_sft": 10,
+      "sampling_mode": "deterministic_ode",
+      "initial_latent": "fresh_gaussian_scale_0.5",
+      "attempts": 20,
+      "on_pad": 16,
+      "pad_center_3cm_lift": 15,
+      "raw": "raw/rl_stage2_fresh_gaussian_0p5_ode_n20.json"
+    },
+    {
+      "id": "rl_stage2_first6_gaussian_ode_n20",
+      "model": "rl_stage2_picklift_repair_step5",
+      "ppo_iterations_from_sft": 10,
+      "sampling_mode": "deterministic_ode",
+      "initial_latent": "fresh_unit_gaussian_action_dims_0_to_5_only",
+      "attempts": 20,
+      "on_pad": 16,
+      "pad_center_3cm_lift": 12,
+      "raw": "raw/rl_stage2_first6_gaussian_1p0_ode_n20.json"
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "model_path": "/network_volume/rlinf_runs/so100_ppo_broad_picklift_repair_lr25e8_kl002_env8_5_20260629_161748/so100_ppo_broad_picklift_repair_lr25e8_kl002_env8_5/checkpoints/global_step_5",
+  "output_dir": "/network_volume/rlinf_eval/noise_scale_fixed_gaussian_0p25_ode_torch28_first5_b1_20260710_040036",
+  "attempts": 5,
+  "max_steps": 900,
+  "batch_size": 1,
+  "inference_backend": "standard",
+  "seed": 0,
+  "episode_ids": [
+    34,
+    25,
+    20,
+    10,
+    12
+  ],
+  "on_pad_count": 5,
+  "pad_center_3cm_lift_count": 4,
+  "on_pad_rate": 1.0,
+  "pad_center_3cm_lift_rate": 0.8,
+  "results": [
+    {
+      "attempt": 0,
+      "episode_id": 34,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.14977774024009705,
+      "cube_target_xy_distance": 0.02408142387866974,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 146.81054465472698,
+        "avg_chunk_ms": 164.66537153903852,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 1,
+      "episode_id": 25,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.15554605424404144,
+      "cube_target_xy_distance": 0.019695181399583817,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 158.26088190078735,
+        "avg_chunk_ms": 155.79225675186566,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 2,
+      "episode_id": 20,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.14067219197750092,
+      "cube_target_xy_distance": 0.018947171047329903,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 139.88862372934818,
+        "avg_chunk_ms": 154.24764466782412,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 3,
+      "episode_id": 10,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.1281842440366745,
+      "cube_target_xy_distance": 0.020030302926898003,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 143.97412352263927,
+        "avg_chunk_ms": 144.7920225429953,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 4,
+      "episode_id": 12,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.1579471379518509,
+      "cube_target_xy_distance": 0.017550626769661903,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 151.87581814825535,
+        "avg_chunk_ms": 147.89875544476928,
+        "chunk_count": 57
+      }
+    }
+  ]
+}

@@ -1,0 +1,337 @@
+{
+  "model_path": "/network_volume/rlinf_runs/so100_ppo_broad_picklift_repair_lr25e8_kl002_env8_5_20260629_161748/so100_ppo_broad_picklift_repair_lr25e8_kl002_env8_5/checkpoints/global_step_5",
+  "output_dir": "/network_volume/rlinf_eval/noise_compare_rl_step5_stochastic_flow_noise_torch28_first20_b1_20260710_021431",
+  "attempts": 20,
+  "max_steps": 900,
+  "batch_size": 1,
+  "inference_backend": "standard",
+  "seed": 0,
+  "episode_ids": [
+    34,
+    25,
+    20,
+    10,
+    12,
+    1,
+    3,
+    0,
+    7,
+    32,
+    25,
+    36,
+    20,
+    24,
+    38,
+    29,
+    25,
+    21,
+    22,
+    37
+  ],
+  "on_pad_count": 13,
+  "pad_center_3cm_lift_count": 10,
+  "on_pad_rate": 0.65,
+  "pad_center_3cm_lift_rate": 0.5,
+  "results": [
+    {
+      "attempt": 0,
+      "episode_id": 34,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.08609028160572052,
+      "cube_target_xy_distance": 0.1354762613773346,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 157.44353830814362,
+        "avg_chunk_ms": 161.38532038843422,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 1,
+      "episode_id": 25,
+      "steps": 900,
+      "on_pad": false,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.07800000160932541,
+      "cube_target_xy_distance": 0.21523243188858032,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 155.66199086606503,
+        "avg_chunk_ms": 152.51159102639608,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 2,
+      "episode_id": 20,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.1410999298095703,
+      "cube_target_xy_distance": 0.013651787303388119,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 156.30613639950752,
+        "avg_chunk_ms": 151.1404164004744,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 3,
+      "episode_id": 10,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.1831180900335312,
+      "cube_target_xy_distance": 0.03531927987933159,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 142.01078563928604,
+        "avg_chunk_ms": 151.5509915587149,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 4,
+      "episode_id": 12,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.15401293337345123,
+      "cube_target_xy_distance": 0.05274809151887894,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 176.9989300519228,
+        "avg_chunk_ms": 151.53561467141435,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 5,
+      "episode_id": 1,
+      "steps": 900,
+      "on_pad": false,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.1457727551460266,
+      "cube_target_xy_distance": 0.2798246741294861,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 159.74416583776474,
+        "avg_chunk_ms": 151.58514171969472,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 6,
+      "episode_id": 3,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.2078222930431366,
+      "cube_target_xy_distance": 0.055328600108623505,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 141.52212254703045,
+        "avg_chunk_ms": 151.6510938016469,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 7,
+      "episode_id": 0,
+      "steps": 900,
+      "on_pad": false,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.07907693088054657,
+      "cube_target_xy_distance": 0.24435028433799744,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 144.35844868421555,
+        "avg_chunk_ms": 154.62106583934082,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 8,
+      "episode_id": 7,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.14842182397842407,
+      "cube_target_xy_distance": 0.04127256199717522,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 147.0098551362753,
+        "avg_chunk_ms": 154.82150626025702,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 9,
+      "episode_id": 32,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.13211196660995483,
+      "cube_target_xy_distance": 0.013678668066859245,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 159.7664300352335,
+        "avg_chunk_ms": 156.8286263367586,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 10,
+      "episode_id": 25,
+      "steps": 900,
+      "on_pad": false,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.07800000160932541,
+      "cube_target_xy_distance": 0.20929011702537537,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 140.37656597793102,
+        "avg_chunk_ms": 158.9932176039407,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 11,
+      "episode_id": 36,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.16846218705177307,
+      "cube_target_xy_distance": 0.024813398718833923,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 155.49581497907639,
+        "avg_chunk_ms": 152.42588817419713,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 12,
+      "episode_id": 20,
+      "steps": 900,
+      "on_pad": false,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.09463363885879517,
+      "cube_target_xy_distance": 0.33351370692253113,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 151.16305835545063,
+        "avg_chunk_ms": 155.5784425061,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 13,
+      "episode_id": 24,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.1696150004863739,
+      "cube_target_xy_distance": 0.0451095774769783,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 157.06557966768742,
+        "avg_chunk_ms": 153.96093603288918,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 14,
+      "episode_id": 38,
+      "steps": 900,
+      "on_pad": false,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.07800000160932541,
+      "cube_target_xy_distance": 0.17462192475795746,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 157.23253972828388,
+        "avg_chunk_ms": 152.50297982180328,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 15,
+      "episode_id": 29,
+      "steps": 900,
+      "on_pad": false,
+      "pad_center_3cm_lift": false,
+      "max_cube_z": 0.08093380182981491,
+      "cube_target_xy_distance": 0.16529040038585663,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 152.5008250027895,
+        "avg_chunk_ms": 154.29775893949625,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 16,
+      "episode_id": 25,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.16008296608924866,
+      "cube_target_xy_distance": 0.028681086376309395,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 144.57218907773495,
+        "avg_chunk_ms": 166.82956374266692,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 17,
+      "episode_id": 21,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.1669776439666748,
+      "cube_target_xy_distance": 0.018396452069282532,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 143.5388531535864,
+        "avg_chunk_ms": 152.08120555862,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 18,
+      "episode_id": 22,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.1333928406238556,
+      "cube_target_xy_distance": 0.008969832211732864,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 163.68702612817287,
+        "avg_chunk_ms": 151.7250685903587,
+        "chunk_count": 57
+      }
+    },
+    {
+      "attempt": 19,
+      "episode_id": 37,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.16145756840705872,
+      "cube_target_xy_distance": 0.04213159158825874,
+      "chunk_latency_ms": {
+        "backend": "standard",
+        "last_chunk_ms": 159.36582535505295,
+        "avg_chunk_ms": 154.71652918086764,
+        "chunk_count": 57
+      }
+    }
+  ]
+}
