@@ -62,6 +62,7 @@ EVAL_MAX_STEPS="${EVAL_MAX_STEPS:-900}"
 EVAL_BATCH_SIZE="${EVAL_BATCH_SIZE:-5}"
 EVAL_NUM_STEPS="${EVAL_NUM_STEPS:-10}"
 EVAL_SEED="${EVAL_SEED:-0}"
+MANIFEST_LIMIT="${MANIFEST_LIMIT:-40}"
 
 export MUJOCO_GL="${MUJOCO_GL:-osmesa}"
 export PYOPENGL_PLATFORM="${PYOPENGL_PLATFORM:-osmesa}"
@@ -320,6 +321,10 @@ PY
 }
 
 case "${MODE}" in
+  custom)
+    EXP="${EXP:-so100_ppo_custom_${STAMP}}"
+    train "${EXP}" "${BASE_MANIFEST}" "${MANIFEST_LIMIT}"
+    ;;
   reproduce)
     EXP="so100_ppo_sft_grasplift_anchor_repro_lr1e7_kl008_env8_5_${STAMP}"
     train "${EXP}" "${BASE_MANIFEST}" 40
@@ -359,7 +364,7 @@ case "${MODE}" in
     eval_ckpt "${ckpt}" "quick20_$(basename "$(dirname "$(dirname "${ckpt}")")")_$(basename "${ckpt}")_${STAMP}" 20 ""
     ;;
   *)
-    echo "Usage: $0 [reproduce|hard|continue-hard|eval|sweep-eval|fix-assets|latest|quick-eval|cleanup-dcp]" >&2
+    echo "Usage: $0 [custom|reproduce|hard|continue-hard|eval|sweep-eval|fix-assets|latest|quick-eval|cleanup-dcp]" >&2
     exit 2
     ;;
 esac
