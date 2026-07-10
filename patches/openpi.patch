@@ -1,0 +1,103 @@
+diff --git a/src/openpi/training/config.py b/src/openpi/training/config.py
+index 4ca47e1..0fd9ffd 100644
+--- a/src/openpi/training/config.py
++++ b/src/openpi/training/config.py
+@@ -20,6 +20,7 @@ import openpi.models.tokenizer as _tokenizer
+ import openpi.policies.aloha_policy as aloha_policy
+ import openpi.policies.droid_policy as droid_policy
+ import openpi.policies.libero_policy as libero_policy
++import openpi.policies.so100_policy as so100_policy
+ import openpi.shared.download as _download
+ import openpi.shared.normalize as _normalize
+ import openpi.training.droid_rlds_dataset as droid_rlds_dataset
+@@ -462,6 +463,46 @@ class LeRobotDROIDDataConfig(DataConfigFactory):
+         )
+ 
+ 
++@dataclasses.dataclass(frozen=True)
++class LeRobotSO100DataConfig(DataConfigFactory):
++    use_delta_joint_actions: bool = True
++
++    @override
++    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
++        repack_transform = _transforms.Group(
++            inputs=[
++                _transforms.RepackTransform(
++                    {
++                        "observation/exterior_image_1_left": "exterior_image_1_left",
++                        "observation/wrist_image_left": "wrist_image_left",
++                        "observation/joint_position": "joint_position",
++                        "observation/gripper_position": "gripper_position",
++                        "actions": "actions",
++                        "prompt": "prompt",
++                    }
++                )
++            ]
++        )
++        data_transforms = _transforms.Group(
++            inputs=[so100_policy.SO100Inputs(model_type=model_config.model_type)],
++            outputs=[so100_policy.SO100Outputs()],
++        )
++        if self.use_delta_joint_actions:
++            delta_action_mask = _transforms.make_bool_mask(5, -1)
++            data_transforms = data_transforms.push(
++                inputs=[_transforms.DeltaActions(delta_action_mask)],
++                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
++            )
++        model_transforms = ModelTransformFactory()(model_config)
++
++        return dataclasses.replace(
++            self.create_base_config(assets_dirs, model_config),
++            repack_transforms=repack_transform,
++            data_transforms=data_transforms,
++            model_transforms=model_transforms,
++        )
++
++
+ @dataclasses.dataclass(frozen=True)
+ class TrainConfig:
+     # Name of the config. Must be unique. Will be used to reference this config.
+@@ -762,6 +803,43 @@ _CONFIGS = [
+         num_train_steps=30_000,
+     ),
+     #
++    # Fine-tuning SO100 sim configs.
++    #
++    TrainConfig(
++        name="pi05_so100_sim",
++        model=pi0_config.Pi0Config(
++            pi05=True,
++            action_dim=32,
++            action_horizon=16,
++            discrete_state_input=False,
++            paligemma_variant="gemma_2b_lora",
++            action_expert_variant="gemma_300m_lora",
++        ),
++        data=LeRobotSO100DataConfig(
++            repo_id="flashact/so100_sim_pick_place_ring_40",
++            base_config=DataConfig(prompt_from_task=True),
++        ),
++        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
++        lr_schedule=_optimizer.CosineDecaySchedule(
++            warmup_steps=200,
++            peak_lr=5e-5,
++            decay_steps=10_000,
++            decay_lr=5e-5,
++        ),
++        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
++        batch_size=8,
++        num_train_steps=5_000,
++        log_interval=50,
++        save_interval=500,
++        keep_period=1_000,
++        freeze_filter=pi0_config.Pi0Config(
++            pi05=True,
++            paligemma_variant="gemma_2b_lora",
++            action_expert_variant="gemma_300m_lora",
++        ).get_freeze_filter(),
++        ema_decay=None,
++    ),
++    #
+     # Fine-tuning Aloha configs.
+     #
+     # This is a test config that is used to illustate how train on a custom LeRobot dataset.

@@ -1,0 +1,340 @@
+diff --git a/rlinf/envs/__init__.py b/rlinf/envs/__init__.py
+index dcbff81d..126fae14 100644
+--- a/rlinf/envs/__init__.py
++++ b/rlinf/envs/__init__.py
+@@ -17,6 +17,7 @@ from enum import Enum
+ 
+ class SupportedEnvType(Enum):
+     MANISKILL = "maniskill"
++    SO100_MUJOCO = "so100_mujoco"
+     LIBERO = "libero"
+     ROBOTWIN = "robotwin"
+     ISAACLAB = "isaaclab"
+@@ -59,6 +60,10 @@ def get_env_cls(env_type: str, env_cfg=None):
+             from rlinf.envs.maniskill.maniskill_env import ManiskillEnv
+ 
+             return ManiskillEnv
++    elif env_type == SupportedEnvType.SO100_MUJOCO:
++        from rlinf.envs.so100_mujoco.so100_mujoco_env import So100MujocoEnv
++
++        return So100MujocoEnv
+     elif env_type == SupportedEnvType.LIBERO:
+         from rlinf.envs.libero.libero_env import LiberoEnv
+ 
+diff --git a/rlinf/envs/action_utils.py b/rlinf/envs/action_utils.py
+index 385fa49b..ffc61519 100644
+--- a/rlinf/envs/action_utils.py
++++ b/rlinf/envs/action_utils.py
+@@ -239,6 +239,12 @@ def prepare_actions_for_mujoco(raw_chunk_actions, model_type):
+     return chunk_actions
+ 
+ 
++def prepare_actions_for_so100_mujoco(raw_chunk_actions, action_dim: int) -> np.ndarray:
++    raw = np.asarray(raw_chunk_actions, dtype=np.float32)
++    chunk_actions = raw[..., :action_dim].copy()
++    return chunk_actions
++
++
+ def prepare_actions_for_d4rl(
+     raw_chunk_actions,
+     action_dim: int,
+@@ -336,6 +342,11 @@ def prepare_actions(
+             raw_chunk_actions=raw_chunk_actions,
+             model_type=model_type,
+         )
++    elif env_type == SupportedEnvType.SO100_MUJOCO:
++        chunk_actions = prepare_actions_for_so100_mujoco(
++            raw_chunk_actions=raw_chunk_actions,
++            action_dim=action_dim,
++        )
+     elif env_type == SupportedEnvType.FRANKASIM:
+         chunk_actions = prepare_actions_for_mujoco(
+             raw_chunk_actions=raw_chunk_actions,
+diff --git a/rlinf/models/__init__.py b/rlinf/models/__init__.py
+index 4ab70ff3..fc46a3bd 100644
+--- a/rlinf/models/__init__.py
++++ b/rlinf/models/__init__.py
+@@ -61,6 +61,11 @@ def _register_builtin_models():
+ 
+         return get_model(cfg, torch_dtype)
+ 
++    def _build_jax_openpi(cfg: DictConfig, torch_dtype):
++        from rlinf.models.embodiment.jax_openpi import get_model
++
++        return get_model(cfg, torch_dtype)
++
+     def _build_dexbotic_pi(cfg: DictConfig, torch_dtype):
+         from rlinf.models.embodiment.dexbotic_pi import get_model
+ 
+@@ -149,6 +154,12 @@ def _register_builtin_models():
+         category="embodied",
+         force=True,
+     )
++    register_model(
++        "jax_openpi",
++        _build_jax_openpi,
++        category="embodied",
++        force=True,
++    )
+     register_model(
+         SupportedModel.DEXBOTIC_PI.value,
+         _build_dexbotic_pi,
+diff --git a/rlinf/models/embodiment/openpi/dataconfig/__init__.py b/rlinf/models/embodiment/openpi/dataconfig/__init__.py
+index c5da7d60..5e518419 100644
+--- a/rlinf/models/embodiment/openpi/dataconfig/__init__.py
++++ b/rlinf/models/embodiment/openpi/dataconfig/__init__.py
+@@ -68,6 +68,9 @@ from rlinf.models.embodiment.openpi.dataconfig.robocasa_dataconfig import (
+ from rlinf.models.embodiment.openpi.dataconfig.robotwin_aloha_dataconfig import (
+     LeRobotAlohaDataConfig,
+ )
++from rlinf.models.embodiment.openpi.dataconfig.so100_dataconfig import (
++    LeRobotSO100DataConfig,
++)
+ 
+ _CONFIGS = [
+     TrainConfig(
+@@ -150,6 +153,36 @@ _CONFIGS = [
+         log_interval=5,
+         save_interval=250,
+     ),
++    TrainConfig(
++        name="pi05_so100_sim",
++        model=pi0_config.Pi0Config(
++            pi05=True,
++            action_dim=32,
++            action_horizon=16,
++            discrete_state_input=False,
++            paligemma_variant="gemma_2b_lora",
++            action_expert_variant="gemma_300m_lora",
++        ),
++        data=LeRobotSO100DataConfig(
++            repo_id="flashact/so100_sim_pick_place_ring_40",
++            base_config=DataConfig(prompt_from_task=True),
++            assets=AssetsConfig(
++                assets_dir="/network_volume/openpi_checkpoints/pi05_so100_sim/so100_contact_cube_pad_lora_8k/7999/assets"
++            ),
++        ),
++        weight_loader=weight_loaders.CheckpointWeightLoader(
++            "/network_volume/openpi_checkpoints/pi05_so100_sim/so100_contact_cube_pad_lora_8k/7999/params"
++        ),
++        pytorch_weight_path="/network_volume/rlinf_checkpoints/pi05_so100_sim_sft_7999_torch",
++        seed=0,
++        batch_size=8,
++        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
++        ema_decay=0.999,
++        num_workers=8,
++        num_train_steps=8_000,
++        log_interval=5,
++        save_interval=250,
++    ),
+     TrainConfig(
+         name="pi05_franka",
+         model=pi0_config.Pi0Config(
+diff --git a/rlinf/utils/ckpt_convertor/convert_openpi_jax_to_python.py b/rlinf/utils/ckpt_convertor/convert_openpi_jax_to_python.py
+index 3e27d36f..1b7ffc2c 100644
+--- a/rlinf/utils/ckpt_convertor/convert_openpi_jax_to_python.py
++++ b/rlinf/utils/ckpt_convertor/convert_openpi_jax_to_python.py
+@@ -52,9 +52,115 @@ from flax.nnx import traversals
+ from openpi.training import utils
+ 
+ 
++
++def _resolve_state_key(
++    state_dict: dict[str, np.ndarray], key: str, suffix: str
++) -> str | None:
++    candidates = (
++        (f"{key}{suffix}", key, f"{key}/value")
++        if suffix
++        else (key, f"{key}/value")
++    )
++    for candidate in candidates:
++        if candidate in state_dict:
++            return candidate
++    return None
++
++
++def _fold_lora_delta(
++    state_dict: dict[str, np.ndarray],
++    weight_key: str,
++    lora_a_key: str,
++    lora_b_key: str,
++    suffix: str,
++) -> bool:
++    resolved_weight_key = _resolve_state_key(state_dict, weight_key, suffix)
++    resolved_lora_a_key = _resolve_state_key(state_dict, lora_a_key, suffix)
++    resolved_lora_b_key = _resolve_state_key(state_dict, lora_b_key, suffix)
++    if (
++        resolved_weight_key is None
++        or resolved_lora_a_key is None
++        or resolved_lora_b_key is None
++    ):
++        return False
++
++    weight = state_dict[resolved_weight_key]
++    delta = np.einsum(
++        "...dr,...rh->...dh",
++        state_dict.pop(resolved_lora_a_key),
++        state_dict.pop(resolved_lora_b_key),
++    )
++    if weight.shape != delta.shape:
++        raise ValueError(
++            f"LoRA delta shape {delta.shape} does not match "
++            f"{resolved_weight_key} shape {weight.shape}"
++        )
++    state_dict[resolved_weight_key] = weight + delta.astype(weight.dtype, copy=False)
++    return True
++
++
++def _fold_openpi_lora_weights(state_dict: dict[str, np.ndarray], suffix: str) -> int:
++    specs = [
++        (
++            "llm/layers/attn/attn_vec_einsum/w",
++            "llm/layers/attn/attn_vec_einsum/lora_a",
++            "llm/layers/attn/attn_vec_einsum/lora_b",
++        ),
++        (
++            "llm/layers/attn/kv_einsum/w",
++            "llm/layers/attn/kv_einsum/lora_a",
++            "llm/layers/attn/kv_einsum/lora_b",
++        ),
++        (
++            "llm/layers/attn/q_einsum/w",
++            "llm/layers/attn/q_einsum/lora_a",
++            "llm/layers/attn/q_einsum/lora_b",
++        ),
++        (
++            "llm/layers/mlp/gating_einsum",
++            "llm/layers/mlp/gating_einsum_lora_a",
++            "llm/layers/mlp/gating_einsum_lora_b",
++        ),
++        (
++            "llm/layers/mlp/linear",
++            "llm/layers/mlp/linear_lora_a",
++            "llm/layers/mlp/linear_lora_b",
++        ),
++        (
++            "llm/layers/attn/attn_vec_einsum_1/w",
++            "llm/layers/attn/attn_vec_einsum_1/lora_a",
++            "llm/layers/attn/attn_vec_einsum_1/lora_b",
++        ),
++        (
++            "llm/layers/attn/kv_einsum_1/w",
++            "llm/layers/attn/kv_einsum_1/lora_a",
++            "llm/layers/attn/kv_einsum_1/lora_b",
++        ),
++        (
++            "llm/layers/attn/q_einsum_1/w",
++            "llm/layers/attn/q_einsum_1/lora_a",
++            "llm/layers/attn/q_einsum_1/lora_b",
++        ),
++        (
++            "llm/layers/mlp_1/gating_einsum",
++            "llm/layers/mlp_1/gating_einsum_lora_a",
++            "llm/layers/mlp_1/gating_einsum_lora_b",
++        ),
++        (
++            "llm/layers/mlp_1/linear",
++            "llm/layers/mlp_1/linear_lora_a",
++            "llm/layers/mlp_1/linear_lora_b",
++        ),
++    ]
++    return sum(_fold_lora_delta(state_dict, *spec, suffix=suffix) for spec in specs)
++
++
+ def slice_paligemma_state_dict(state_dict, config):
+     """Convert PaliGemma JAX parameters to PyTorch format."""
+     suffix = "/value" if "img/embedding/kernel/value" in state_dict else ""
++    folded_lora_count = _fold_openpi_lora_weights(state_dict, suffix=suffix)
++    if folded_lora_count:
++        print(f"Folded {folded_lora_count} OpenPI LoRA adapters into base weights.")
+ 
+     # patch embeddings
+     jax_key = f"img/embedding/kernel{suffix}"
+@@ -649,14 +755,26 @@ def convert_pi0_checkpoint(
+         pi0_model, os.path.join(output_path, "model.safetensors")
+     )
+ 
+-    # Copy assets folder if it exists
+-    assets_source = pathlib.Path(checkpoint_dir).parent / "assets"
+-    if assets_source.exists():
++    # Copy assets folder if it exists. OpenPI checkpoints may keep assets either
++    # next to the step directory or inside the step directory itself.
++    assets_sources = [
++        pathlib.Path(checkpoint_dir) / "assets",
++        pathlib.Path(checkpoint_dir).parent / "assets",
++    ]
++    assets_source = next((path for path in assets_sources if path.exists()), None)
++    if assets_source is not None:
+         assets_dest = pathlib.Path(output_path) / "assets"
+         if assets_dest.exists():
+             shutil.rmtree(assets_dest)
+         shutil.copytree(assets_source, assets_dest)
+ 
++        # RLinf's OpenPI loader asks for checkpoint_dir / asset_id directly.
++        for child in assets_source.iterdir():
++            direct_dest = pathlib.Path(output_path) / child.name
++            if direct_dest.exists():
++                shutil.rmtree(direct_dest)
++            shutil.copytree(child, direct_dest)
++
+     # Save config as JSON for reference
+     config_dict = {
+         "action_dim": model_config.action_dim,
+diff --git a/rlinf/workers/actor/fsdp_actor_worker.py b/rlinf/workers/actor/fsdp_actor_worker.py
+index 6cd2aa43..3a29cc8b 100644
+--- a/rlinf/workers/actor/fsdp_actor_worker.py
++++ b/rlinf/workers/actor/fsdp_actor_worker.py
+@@ -1237,6 +1237,7 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
+                 model_path=self.cfg.actor.model.model_path,
+                 repo_id=repo_id,
+                 data_kwargs=getattr(self.cfg.actor, "openpi_data", None),
++                batch_size=self.cfg.actor.get("sft_batch_size", None),
+             )
+             self.data_loader = _data.create_data_loader(
+                 data_loader_config, framework="pytorch", shuffle=True
+@@ -1266,9 +1267,13 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
+             self.sft_iterator = iter(self.data_loader)
+             observation, actions = next(self.sft_iterator)
+ 
++        use_action_chunk_loss = (
++            SupportedModel(self.cfg.actor.model.model_type) == SupportedModel.OPENPI
++        )
+         sft_loss = self.model(
+             data=(observation, actions),
+             forward_type=ForwardType.SFT,
++            use_action_chunk_loss=use_action_chunk_loss,
+         )
+         metrics_data["sft_loss"] = sft_loss.detach().item()
+         total_loss = loss + self.sft_loss_weight * sft_loss
+@@ -1287,6 +1292,7 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
+                 f"ppo_loss={metrics_data['ppo_loss']:.6f}, "
+                 f"sft_loss_weight={self.sft_loss_weight:.6f}"
+             )
++        return loss
+ 
+     @Worker.timer("run_training")
+     def run_training(self) -> None:
+@@ -1477,7 +1483,7 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
+         metrics_data["actor/entropy_loss"] = entropy_loss.detach().item()
+ 
+         if self.enable_sft_co_train:
+-            self._train_sft_epoch(metrics_data, loss)
++            loss = self._train_sft_epoch(metrics_data, loss)
+ 
+         loss /= self.gradient_accumulation
+         with backward_ctx:
+diff --git a/rlinf/workers/rollout/hf/huggingface_worker.py b/rlinf/workers/rollout/hf/huggingface_worker.py
+index 267c7630..f84d743a 100644
+--- a/rlinf/workers/rollout/hf/huggingface_worker.py
++++ b/rlinf/workers/rollout/hf/huggingface_worker.py
+@@ -495,7 +495,9 @@ class MultiStepRolloutWorker(Worker):
+             else self._eval_sampling_params
+         )
+ 
+-        if SupportedModel(self.model_cfg.model_type) in [
++        if str(self.model_cfg.model_type) == "jax_openpi":
++            kwargs = {"mode": mode}
++        elif SupportedModel(self.model_cfg.model_type) in [
+             SupportedModel.OPENPI,
+             SupportedModel.MLP_POLICY,
+             SupportedModel.GR00T,
