@@ -121,6 +121,32 @@
       "on_pad": 16,
       "pad_center_3cm_lift": 12,
       "raw": "raw/rl_stage2_first6_gaussian_1p0_ode_n20.json"
+    },
+    {
+      "id": "sft_hybrid_zero_episode34",
+      "model": "distilled_torch_sft",
+      "ppo_iterations_from_sft": 0,
+      "sampling_mode": "deterministic_ode",
+      "initial_latent": "zeros",
+      "inference_backend": "flashrt_fp8_plus_mk_v6_fp8",
+      "attempts": 1,
+      "on_pad": 1,
+      "pad_center_3cm_lift": 1,
+      "last_chunk_ms": 22.088821977376938,
+      "raw": "raw/sft_hybrid_zero_episode34.json"
+    },
+    {
+      "id": "rl_hybrid_zero_episode34",
+      "model": "deployed_rl_step5",
+      "ppo_iterations_from_sft": 5,
+      "sampling_mode": "deterministic_ode",
+      "initial_latent": "zeros",
+      "inference_backend": "flashrt_fp8_plus_mk_v6_fp8",
+      "attempts": 1,
+      "on_pad": 1,
+      "pad_center_3cm_lift": 1,
+      "last_chunk_ms": 20.304424222558737,
+      "raw": "raw/rl_hybrid_zero_episode34.json"
     }
   ]
 }

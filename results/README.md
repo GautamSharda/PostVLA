@@ -34,3 +34,12 @@ For center + lift: 46 both, 7 SFT-only, 36 RL-only, and 11 neither.
 The unresolved control is a full `n=100` zero-latent evaluation of distilled SFT. Until that is
 run, `69 -> 90` must not be described purely as an RL gain; it combines a policy change with a
 decoder change.
+
+## Hybrid Deployment Validation
+
+The FlashRT FP8 frontend plus FlashAct `mk_v6` FP8 loop was validated separately on
+known-success episode 34 because the published FlashAct task-level result is for LIBERO,
+not SO100. Both the distilled SFT and deployed RL checkpoints lifted the cube and placed it
+within 3 cm of pad center over the full 900-step rollout. Their final measured chunk calls
+were 22.1 ms and 20.3 ms respectively after first-call graph capture. These are `n=1`
+behavioral integration checks, not estimates of overall task success.

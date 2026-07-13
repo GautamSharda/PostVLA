@@ -1,0 +1,34 @@
+{
+  "model_path": "/network_volume/rlinf_runs/so100_ppo_broad_picklift_repair_lr25e8_kl002_env8_5_20260629_161748/so100_ppo_broad_picklift_repair_lr25e8_kl002_env8_5/checkpoints/global_step_5",
+  "output_dir": "/network_volume/rlinf_eval/hybrid_so100_full_rl_episode34",
+  "attempts": 1,
+  "max_steps": 900,
+  "batch_size": 1,
+  "inference_backend": "hybrid",
+  "seed": 0,
+  "episode_ids": [
+    34
+  ],
+  "on_pad_count": 1,
+  "pad_center_3cm_lift_count": 1,
+  "on_pad_rate": 1.0,
+  "pad_center_3cm_lift_rate": 1.0,
+  "results": [
+    {
+      "attempt": 0,
+      "episode_id": 34,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.14062853157520294,
+      "cube_target_xy_distance": 0.009521203115582466,
+      "chunk_latency_ms": {
+        "backend": "hybrid",
+        "last_chunk_ms": 20.304424222558737,
+        "avg_chunk_ms": 36.18915151118448,
+        "chunk_count": 57
+      },
+      "video": "/network_volume/rlinf_eval/hybrid_so100_full_rl_episode34/videos/attempt_000.mp4"
+    }
+  ]
+}

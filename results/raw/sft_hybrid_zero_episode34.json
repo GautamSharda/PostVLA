@@ -1,0 +1,34 @@
+{
+  "model_path": "/network_volume/rlinf_checkpoints/pi05_so100_sim_sft_7999_torch_lorafold_jaxteacher_cubevar20_900_tail2_e3",
+  "output_dir": "/network_volume/rlinf_eval/sft_vs_rl_compare_site/live_outputs/sft_opt_attempt_000_1783928366",
+  "attempts": 1,
+  "max_steps": 900,
+  "batch_size": 1,
+  "inference_backend": "hybrid",
+  "seed": 0,
+  "episode_ids": [
+    34
+  ],
+  "on_pad_count": 1,
+  "pad_center_3cm_lift_count": 1,
+  "on_pad_rate": 1.0,
+  "pad_center_3cm_lift_rate": 1.0,
+  "results": [
+    {
+      "attempt": 0,
+      "episode_id": 34,
+      "steps": 900,
+      "on_pad": true,
+      "pad_center_3cm_lift": true,
+      "max_cube_z": 0.14873600006103516,
+      "cube_target_xy_distance": 0.02265702560544014,
+      "chunk_latency_ms": {
+        "backend": "hybrid",
+        "last_chunk_ms": 22.088821977376938,
+        "avg_chunk_ms": 29.784461752952712,
+        "chunk_count": 57
+      },
+      "video": "/network_volume/rlinf_eval/sft_vs_rl_compare_site/live_outputs/sft_opt_attempt_000_1783928366/videos/attempt_000.mp4"
+    }
+  ]
+}
