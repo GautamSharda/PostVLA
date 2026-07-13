@@ -8,3 +8,6 @@
 	url = https://github.com/chernyadev/mujoco_menagerie.git
 	branch = add-so-arm100
 	path = third_party/mujoco_menagerie
+[submodule "third_party/FlashRT"]
+	path = third_party/FlashRT
+	url = https://github.com/LiangSu8899/FlashRT.git
