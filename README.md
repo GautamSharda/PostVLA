@@ -8,6 +8,7 @@ PostVLA reproduces an SO100 pick-and-place post-training study for OpenPI pi0.5:
 4. Convert to RLinf's PyTorch OpenPI implementation and calibrate against the JAX teacher.
 5. Continue online with two five-iteration PPO stages using RLinf's flow-noise path.
 6. Evaluate matched cube-position rollouts under several initial-latent and sampler settings.
+7. Compare the standard policy with the FlashRT FP8 frontend plus FlashAct `mk_v6` FP8 loop.
 
 Third-party projects are pinned as submodules; our changes are explicit patches and overlays.
 Checkpoints, datasets, videos, and run directories are intentionally excluded from Git.
@@ -65,7 +66,8 @@ conversion, calibration, and two-stage PPO commands are in
 - `scripts/calibration/`: JAX teacher rollout collection and PyTorch calibration.
 - `scripts/train/`: OpenPI SFT, conversion, RLinf SFT, and PPO launchers.
 - `scripts/eval/`: batched rollout, sampler controls, and comparison tools.
+- `kernels/pi05/`: the `mk_v6` denoising kernel and portable FlashRT hybrid wrapper.
+- `web/`: four-lane SFT/RL standard-versus-optimized live viewer.
 - `overlays/`, `patches/`: auditable changes applied to pinned submodules.
 - `configs/`: manifests and resolved historical run configurations.
 - `results/`: raw summaries and a compact experiment index.
-

@@ -134,3 +134,49 @@ Change only `--initial-noise-mode` to run controls:
 
 Use `--sampling-mode train` to exercise RLinf's stochastic flow-noise path. Keep episode IDs,
 batch size, step cap, and seeds fixed when making paired comparisons.
+
+## 8. FlashRT + FlashAct hybrid inference
+
+The optimized deployment uses a different runtime from RLinf training: CUDA 13 and
+PyTorch 2.10 on an RTX 5090. FlashRT executes the FP8 vision/language prefix and the
+FlashAct `mk_v6` cooperative kernel executes all ten denoising steps in one launch.
+
+Create a FlashRT checkpoint view over the distilled SFT model. The RL checkpoint can
+reuse this frontend because PPO trained only the action expert; its action-expert weights
+are loaded separately from `full_weights.pt`.
+
+```bash
+mkdir -p "$POSTVLA_ARTIFACT_ROOT/checkpoints/flashrt_sft"
+ln -s "$POSTVLA_DISTILLED_CKPT/model.safetensors" \
+  "$POSTVLA_ARTIFACT_ROOT/checkpoints/flashrt_sft/model.safetensors"
+ln -s "$POSTVLA_DISTILLED_CKPT/flashact/so100_sim_pick_place_ring_40/norm_stats.json" \
+  "$POSTVLA_ARTIFACT_ROOT/checkpoints/flashrt_sft/norm_stats.json"
+
+CUDA_HOME=/usr/local/cuda-13.0 \
+POSTVLA_HYBRID_FRONTEND_CHECKPOINT="$POSTVLA_ARTIFACT_ROOT/checkpoints/flashrt_sft" \
+python3 scripts/eval/eval_noise_control.py \
+  --model-path /path/to/sft-or-rl-checkpoint \
+  --output-dir "$POSTVLA_ARTIFACT_ROOT/eval/hybrid" \
+  --attempts 1 --batch-size 1 --max-steps 900 --num-steps 10 \
+  --sampling-mode eval --initial-noise-mode zero --inference-backend hybrid \
+  --save-videos
+```
+
+On the validation pod, known-success episode 34 completed for both SFT and RL. After
+first-call graph capture, the 16-action chunks were approximately 20-22 ms. The original
+FlashAct latency claim was validated on LIBERO; SO100 task-level parity must therefore be
+checked independently, as done by these saved rollouts.
+
+## 9. Live viewer
+
+The live viewer runs SFT standard, SFT optimized, RL standard, and RL optimized one at a
+time and streams MuJoCo frames over MJPEG. Configure checkpoint paths and launch:
+
+```bash
+POSTVLA_SFT_CKPT="$POSTVLA_DISTILLED_CKPT" \
+POSTVLA_RL_CKPT=/path/to/rl/checkpoints/global_step_5 \
+POSTVLA_HYBRID_FRONTEND_CHECKPOINT="$POSTVLA_ARTIFACT_ROOT/checkpoints/flashrt_sft" \
+python3 web/live_server.py
+```
+
+Open `http://127.0.0.1:8011/`; saved benchmark videos remain available under `/history`.
