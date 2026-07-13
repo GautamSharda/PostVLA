@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SO100 Saved Rollouts</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #eef2f6;
+        color: #111827;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #eef2f6; }
+      main { padding: 22px; }
+      header {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+      .eyebrow {
+        margin: 0 0 6px;
+        color: #64748b;
+        font-size: 15px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(36px, 6vw, 76px);
+        line-height: 0.95;
+        letter-spacing: 0;
+      }
+      a {
+        color: #111827;
+        font-weight: 800;
+        text-decoration: none;
+      }
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      button, input {
+        height: 44px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #fff;
+        color: #111827;
+        font: inherit;
+        font-weight: 800;
+      }
+      button { padding: 0 14px; cursor: pointer; }
+      input { width: 92px; padding: 0 10px; }
+      .score-strip {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .score {
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 14px 16px;
+      }
+      .score span {
+        display: block;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+      .score strong {
+        display: block;
+        margin-top: 6px;
+        font-size: clamp(22px, 3vw, 36px);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+      article {
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+      }
+      article header {
+        margin: 0;
+        padding: 14px 16px;
+        border-bottom: 1px solid #d7dee8;
+      }
+      h2 { margin: 0; font-size: clamp(24px, 3vw, 34px); }
+      article p {
+        margin: 4px 0 0;
+        color: #64748b;
+        font-weight: 700;
+      }
+      video {
+        display: block;
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        background: #111827;
+      }
+      dl {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin: 0;
+        border-top: 1px solid #d7dee8;
+      }
+      .metric {
+        min-width: 0;
+        padding: 12px 14px;
+        border-right: 1px solid #d7dee8;
+      }
+      .metric:last-child { border-right: 0; }
+      dt {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+      dd {
+        margin: 5px 0 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 18px;
+        font-weight: 800;
+      }
+      @media (max-width: 920px) {
+        header { align-items: stretch; flex-direction: column; }
+        .toolbar { justify-content: flex-start; }
+        .score-strip, .grid { grid-template-columns: 1fr; }
+        dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">FlashAct Demo</p>
+          <h1>SO100 Saved Rollouts</h1>
+        </div>
+        <div class="toolbar">
+          <button id="prev" type="button">Prev</button>
+          <input id="attempt" type="number" min="0" max="99" value="0" aria-label="Attempt" />
+          <button id="next" type="button">Next</button>
+          <button id="play" type="button">Play</button>
+          <a href="/">Live</a>
+        </div>
+      </header>
+
+      <section class="score-strip">
+        <div class="score"><span>SFT score</span><strong id="sftScore">--</strong></div>
+        <div class="score"><span>RL score</span><strong id="rlScore">--</strong></div>
+      </section>
+
+      <section class="grid">
+        <article>
+          <header>
+            <div>
+              <h2>SFT</h2>
+              <p>calibrated torch SFT checkpoint</p>
+            </div>
+          </header>
+          <video id="sftVideo" controls muted playsinline loop></video>
+          <dl id="sftMetrics"></dl>
+        </article>
+        <article>
+          <header>
+            <div>
+              <h2>RL</h2>
+              <p>pick/lift repair RL step 5</p>
+            </div>
+          </header>
+          <video id="rlVideo" controls muted playsinline loop></video>
+          <dl id="rlMetrics"></dl>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      const attemptInput = document.getElementById("attempt");
+      const sftVideo = document.getElementById("sftVideo");
+      const rlVideo = document.getElementById("rlVideo");
+      const state = { sft: null, rl: null, playing: false };
+
+      const yes = (value) => value ? "yes" : "no";
+      const fixed = (value, digits = 3) => value === null || value === undefined ? "--" : Number(value).toFixed(digits);
+
+      function videoPath(kind, index) {
+        return `/${kind}_videos/attempt_${String(index).padStart(3, "0")}.mp4`;
+      }
+
+      function metricsHtml(item, index) {
+        return `
+          <div class="metric"><dt>Attempt</dt><dd>${index}</dd></div>
+          <div class="metric"><dt>Success</dt><dd>${yes(item?.on_pad)}</dd></div>
+          <div class="metric"><dt>Max z</dt><dd>${fixed(item?.max_cube_z, 3)}</dd></div>
+        `;
+      }
+
+      function updateAttempt(rawIndex) {
+        const index = Math.max(0, Math.min(99, Number(rawIndex) || 0));
+        attemptInput.value = index;
+        sftVideo.src = videoPath("sft", index);
+        rlVideo.src = videoPath("rl", index);
+        document.getElementById("sftMetrics").innerHTML = metricsHtml(state.sft?.results?.[index], index);
+        document.getElementById("rlMetrics").innerHTML = metricsHtml(state.rl?.results?.[index], index);
+        if (state.playing) {
+          Promise.allSettled([sftVideo.play(), rlVideo.play()]);
+        }
+      }
+
+      async function loadSummary() {
+        const [sft, rl] = await Promise.all([
+          fetch("/sft_summary.json").then((r) => r.json()),
+          fetch("/rl_summary.json").then((r) => r.json()),
+        ]);
+        state.sft = sft;
+        state.rl = rl;
+        document.getElementById("sftScore").textContent = `${sft.on_pad_count}/${sft.attempts}`;
+        document.getElementById("rlScore").textContent = `${rl.on_pad_count}/${rl.attempts}`;
+        updateAttempt(attemptInput.value);
+      }
+
+      document.getElementById("prev").addEventListener("click", () => updateAttempt(Number(attemptInput.value) - 1));
+      document.getElementById("next").addEventListener("click", () => updateAttempt(Number(attemptInput.value) + 1));
+      attemptInput.addEventListener("input", () => updateAttempt(attemptInput.value));
+      attemptInput.addEventListener("change", () => updateAttempt(attemptInput.value));
+      document.getElementById("play").addEventListener("click", async () => {
+        state.playing = !state.playing;
+        document.getElementById("play").textContent = state.playing ? "Pause" : "Play";
+        if (state.playing) await Promise.allSettled([sftVideo.play(), rlVideo.play()]);
+        else { sftVideo.pause(); rlVideo.pause(); }
+      });
+      [sftVideo, rlVideo].forEach((video) => {
+        video.addEventListener("play", () => { state.playing = true; document.getElementById("play").textContent = "Pause"; });
+        video.addEventListener("pause", () => {
+          if (sftVideo.paused && rlVideo.paused) {
+            state.playing = false;
+            document.getElementById("play").textContent = "Play";
+          }
+        });
+      });
+      loadSummary();
+    </script>
+  </body>
+</html>
