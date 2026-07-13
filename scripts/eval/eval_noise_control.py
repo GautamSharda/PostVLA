@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import gc
 import json
 import os
 from pathlib import Path
@@ -364,6 +365,87 @@ class MegakernelOpenPiPolicy:
         }
 
 
+class FlashActHybridOpenPiPolicy:
+    """FlashRT FP8 prefix plus FlashAct's advertised FP8 ``mk_v6`` loop."""
+
+    def __init__(
+        self,
+        base_model,
+        *,
+        frontend_checkpoint: str,
+        weights_path: str,
+        num_steps: int,
+        initial_noise_mode: str,
+        initial_noise_scale: float,
+    ):
+        self.config = base_model.config
+        self.input_transform = base_model.input_transform
+        self.output_transform = base_model.output_transform
+
+        base_model.cpu()
+        gc.collect()
+        torch.cuda.empty_cache()
+
+        sys.path.insert(0, str(MEGAKERNEL_ROOT / "mk_v6"))
+        from hybrid_model import HybridPi05
+
+        noise_mode = "scale" if initial_noise_mode == "scaled_gaussian" else initial_noise_mode
+        if noise_mode not in {"gaussian", "zero", "scale"}:
+            raise ValueError(
+                f"hybrid backend does not support initial-noise-mode={initial_noise_mode!r}"
+            )
+        self.engine = HybridPi05(
+            frontend_checkpoint,
+            weights=weights_path,
+            chunk_size=int(self.config.action_horizon),
+            num_steps=num_steps,
+            return_raw=True,
+            initial_noise_mode=noise_mode,
+            initial_noise_scale=initial_noise_scale,
+            state_in_prompt=False,
+        )
+
+    @staticmethod
+    def _first_numpy(value):
+        value = tensor_to_numpy(value)
+        if value.ndim == 4:
+            value = value[0]
+        return np.asarray(value, dtype=np.uint8)
+
+    @torch.no_grad()
+    def predict_action_batch(self, env_obs, mode="eval", compute_values=False, **kwargs):
+        if int(env_obs["main_images"].shape[0]) != 1:
+            raise ValueError("hybrid inference backend currently requires batch_size=1")
+
+        to_process_obs = {
+            "observation/image": env_obs["main_images"],
+            "observation/wrist_image": env_obs["wrist_images"],
+            "observation/state": env_obs["states"],
+            "prompt": env_obs["task_descriptions"],
+        }
+        processed_obs = self.input_transform(to_process_obs, transpose=False)
+        images = [
+            self._first_numpy(env_obs["main_images"]),
+            self._first_numpy(env_obs["wrist_images"]),
+        ]
+        raw_actions = self.engine.predict(
+            images,
+            env_obs["task_descriptions"][0],
+            state=None,
+        )
+        actions = self.output_transform(
+            {
+                "actions": torch.as_tensor(raw_actions[None], dtype=torch.float32),
+                "state": torch.as_tensor(processed_obs["state"], dtype=torch.float32),
+            }
+        )["actions"]
+        return torch.as_tensor(actions, dtype=torch.float32), {
+            "prev_logprobs": None,
+            "prev_values": None,
+            "forward_inputs": {},
+        }
+
+
 def render_env_frames(env):
     frames = []
     for data in env.datas:
@@ -418,6 +500,18 @@ def load_episode_ids(path: str, attempts: int, seed: int, limit: int):
         return ids[:attempts]
     rng = np.random.default_rng(seed)
     return [int(x) for x in rng.integers(0, limit, size=attempts)]
+
+
+def resolve_hybrid_weights(model_path: str) -> str:
+    root = Path(model_path)
+    for candidate in (
+        root / "model.safetensors",
+        root / "actor" / "model_state_dict" / "full_weights.pt",
+        root / "model_state_dict" / "full_weights.pt",
+    ):
+        if candidate.exists():
+            return str(candidate)
+    raise FileNotFoundError(f"No hybrid-compatible weights found below {root}")
 
 
 def run_batch(model, env_cls, args, attempt_offset: int, episode_ids: list[int], out_dir: Path):
@@ -560,11 +654,25 @@ def main():
         default="eval",
         help="RLinf policy path: eval is deterministic ODE integration; train enables flow-noise sampling.",
     )
-    ap.add_argument("--inference-backend", choices=["standard", "megakernel"], default="standard")
+    ap.add_argument(
+        "--inference-backend",
+        choices=["standard", "megakernel", "hybrid"],
+        default="standard",
+    )
+    ap.add_argument(
+        "--hybrid-frontend-checkpoint",
+        default=os.environ.get("POSTVLA_HYBRID_FRONTEND_CHECKPOINT", ""),
+    )
+    ap.add_argument("--hybrid-weights", default="")
     args = ap.parse_args()
 
-    if args.inference_backend == "megakernel" and args.batch_size != 1:
-        raise ValueError("megakernel inference backend currently requires --batch-size 1")
+    if args.inference_backend in {"megakernel", "hybrid"} and args.batch_size != 1:
+        raise ValueError(f"{args.inference_backend} inference backend currently requires --batch-size 1")
+    if args.inference_backend == "hybrid" and not args.hybrid_frontend_checkpoint:
+        raise ValueError(
+            "hybrid backend requires --hybrid-frontend-checkpoint or "
+            "POSTVLA_HYBRID_FRONTEND_CHECKPOINT"
+        )
 
     os.environ.setdefault("MUJOCO_GL", "osmesa")
     torch.manual_seed(args.seed)
@@ -587,10 +695,20 @@ def main():
     t0 = time.time()
     model = get_model(make_model_cfg(args.model_path, args.num_steps))
     model.eval()
-    model.cuda()
-    apply_noise_control(model, args.initial_noise_mode, args.initial_noise_scale)
-    if args.inference_backend == "megakernel":
-        model = MegakernelOpenPiPolicy(model, args.num_steps)
+    if args.inference_backend == "hybrid":
+        model = FlashActHybridOpenPiPolicy(
+            model,
+            frontend_checkpoint=args.hybrid_frontend_checkpoint,
+            weights_path=args.hybrid_weights or resolve_hybrid_weights(args.model_path),
+            num_steps=args.num_steps,
+            initial_noise_mode=args.initial_noise_mode,
+            initial_noise_scale=args.initial_noise_scale,
+        )
+    else:
+        model.cuda()
+        apply_noise_control(model, args.initial_noise_mode, args.initial_noise_scale)
+        if args.inference_backend == "megakernel":
+            model = MegakernelOpenPiPolicy(model, args.num_steps)
     print(f"loaded model in {time.time() - t0:.1f}s", flush=True)
     print(
         f"noise_control mode={args.initial_noise_mode} scale={args.initial_noise_scale} backend={args.inference_backend}",
