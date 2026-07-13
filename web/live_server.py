@@ -196,7 +196,6 @@ def run_job(job_id: str) -> None:
             "0",
             "--initial-noise-mode",
             "zero",
-            "--save-videos",
             "--stream-dir",
             str(out_dir / "stream"),
             "--stream-every-steps",
@@ -231,15 +230,11 @@ def run_job(job_id: str) -> None:
             return
 
         summary = read_json(out_dir / "summary.json")
-        video = out_dir / "videos" / "attempt_000.mp4"
-        if not video.exists():
-            raise FileNotFoundError(f"Expected video missing: {video}")
         job.update(
             {
                 "state": "done",
                 "message": f"Live rollout complete for task {task_id}",
                 "summary": summary,
-                "video_url": f"/live_outputs/{job_id}/videos/attempt_000.mp4?ts={int(time.time())}",
                 "stream_url": stream_url(job_id),
                 "log_tail": tail_text(log_path),
             }
