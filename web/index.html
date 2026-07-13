@@ -17,7 +17,6 @@
       header {
         display: flex;
         align-items: end;
-        justify-content: space-between;
         gap: 16px;
         margin-bottom: 18px;
       }
@@ -40,24 +39,6 @@
         font-weight: 800;
         text-decoration: none;
       }
-      .toolbar {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-      }
-      button, input {
-        height: 44px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        background: #fff;
-        color: #111827;
-        font: inherit;
-        font-weight: 800;
-      }
-      button { padding: 0 14px; cursor: pointer; }
-      input { width: 92px; padding: 0 10px; }
       .status {
         min-height: 26px;
         margin: -8px 0 14px;
@@ -161,7 +142,6 @@
       }
       @media (max-width: 920px) {
         header { align-items: stretch; flex-direction: column; }
-        .toolbar { justify-content: flex-start; }
         .score-strip, .grid { grid-template-columns: 1fr; }
         dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
@@ -173,12 +153,6 @@
         <div>
           <p class="eyebrow">FlashAct Demo</p>
           <h1>SO100 Live Inference</h1>
-        </div>
-        <div class="toolbar">
-          <button id="prev" type="button">Prev</button>
-          <input id="attempt" type="number" min="0" max="99" value="0" aria-label="Attempt" />
-          <button id="next" type="button">Next</button>
-          <a href="/history">History</a>
         </div>
       </header>
 
@@ -193,15 +167,22 @@
     </main>
 
     <script>
-      const attemptInput = document.getElementById("attempt");
+      const TASK_ID = 34;
+      const FLASHACT_PI05_URL = "https://github.com/GautamSharda/FlashAct/tree/main/src/pi05";
       const liveStatus = document.getElementById("liveStatus");
       const liveGrid = document.getElementById("liveGrid");
       const modelOrder = ["sft", "sft_opt", "rl", "rl_opt"];
       const panels = {
-        sft: { title: "SFT", subtitle: "standard RLinf/OpenPI inference", summary: "sft" },
-        rl: { title: "RL", subtitle: "standard RLinf/OpenPI inference", summary: "rl" },
-        sft_opt: { title: "SFT optimized", subtitle: "same SFT weights, FlashRT FP8 + mk_v6 FP8", summary: "sft" },
-        rl_opt: { title: "RL optimized", subtitle: "same RL weights, FlashRT FP8 + mk_v6 FP8", summary: "rl" },
+        sft: { title: "SFT", subtitle: "RLinf inference" },
+        rl: { title: "RL", subtitle: "RLinf inference" },
+        sft_opt: {
+          title: "SFT optimized",
+          subtitle: `Same SFT weights, <a href="${FLASHACT_PI05_URL}" target="_blank" rel="noreferrer">FlashAct pi0.5 megakernel</a>`,
+        },
+        rl_opt: {
+          title: "RL optimized",
+          subtitle: `Same RL weights, <a href="${FLASHACT_PI05_URL}" target="_blank" rel="noreferrer">FlashAct pi0.5 megakernel</a>`,
+        },
       };
       const displayOrder = ["sft", "rl", "sft_opt", "rl_opt"];
       const state = {
@@ -212,7 +193,7 @@
         latestMetrics: {},
       };
 
-      const yes = (value) => value ? "yes" : "no";
+      const yes = (value) => value === true ? "yes" : value === false ? "no" : "--";
       const fixed = (value, digits = 3) => value === null || value === undefined ? "--" : Number(value).toFixed(digits);
       const ms = (value) => value === null || value === undefined ? "--" : `${Number(value).toFixed(1)} ms`;
 
@@ -244,21 +225,15 @@
         };
       }
 
-      function metricsHtml(item, index, liveMetrics = null) {
+      function metricsHtml(item = null, liveMetrics = null) {
         const latency = liveMetrics || item?.chunk_latency_ms || {};
         return `
-          <div class="metric"><dt>Episode</dt><dd>${index}</dd></div>
+          <div class="metric"><dt>Task</dt><dd>${TASK_ID}</dd></div>
           <div class="metric"><dt>Success</dt><dd>${yes(item?.on_pad)}</dd></div>
           <div class="metric"><dt>Last chunk</dt><dd>${ms(latency.last_chunk_ms)}</dd></div>
           <div class="metric"><dt>Avg chunk</dt><dd>${ms(latency.avg_chunk_ms)}</dd></div>
           <div class="metric"><dt>Chunks</dt><dd>${latency.chunk_count ?? "--"}</dd></div>
         `;
-      }
-
-      function selectedAttempt() {
-        const index = Math.max(0, Math.min(99, Number(attemptInput.value) || 0));
-        attemptInput.value = index;
-        return index;
       }
 
       function resetPanel(kind, text = "idle") {
@@ -300,20 +275,14 @@
         }
       }
 
-      function resultFor(kind, index) {
-        return state[panels[kind].summary]?.results?.[index] || null;
-      }
-
       function updateMetrics(kind, liveMetrics = null, resultOverride = null) {
-        const index = selectedAttempt();
         panel(kind).metrics.innerHTML = metricsHtml(
-          resultOverride || resultFor(kind, index),
-          index,
+          resultOverride,
           liveMetrics || state.latestMetrics[kind] || null,
         );
       }
 
-      function updateMetricsForAttempt() {
+      function updateAllMetrics() {
         for (const kind of displayOrder) updateMetrics(kind);
       }
 
@@ -358,7 +327,7 @@
         if (result?.chunk_latency_ms) state.latestMetrics[kind] = result.chunk_latency_ms;
         updateMetrics(kind, result?.chunk_latency_ms || null, result);
         setLiveStatusWithLink(
-          `${panels[kind].title} live rollout complete for episode ${selectedAttempt()}.`,
+          `${panels[kind].title} live rollout complete for task ${TASK_ID}.`,
           status.video_url,
         );
         scheduleNextRun(1000);
@@ -366,9 +335,8 @@
 
       async function runLiveInference(model = state.nextModel) {
         if (state.liveBusy) return;
-        const index = selectedAttempt();
         state.liveBusy = true;
-        setLiveStatus(`Starting ${panels[model].title} live rollout for episode ${index}...`);
+        setLiveStatus(`Starting ${panels[model].title} live rollout for task ${TASK_ID}...`);
         resetPanel(model, "loading");
         state.latestMetrics[model] = null;
         updateMetrics(model);
@@ -376,13 +344,13 @@
           const response = await fetch("/api/live-run", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ model, attempt: index }),
+            body: JSON.stringify({ model, task_id: TASK_ID }),
           });
           const body = await response.json();
           if (!response.ok) throw new Error(body.error || `live run failed: ${response.status}`);
           if (body.stream_url) {
             showLiveStream(model, body.stream_url);
-            setLiveStatus(`Streaming ${panels[model].title} live rollout for episode ${index}...`);
+            setLiveStatus(`Streaming ${panels[model].title} live rollout for task ${TASK_ID}...`);
           }
           await pollLiveJob(body.job_id);
         } catch (error) {
@@ -407,8 +375,7 @@
           const body = await response.json();
           const job = body.running;
           if (!job?.job_id || !job?.stream_url || !job?.model) return false;
-          attemptInput.value = job.attempt ?? selectedAttempt();
-          updateMetricsForAttempt();
+          updateAllMetrics();
           state.liveBusy = true;
           showLiveStream(job.model, job.stream_url);
           setLiveStatus(job.message || `Streaming ${panels[job.model].title} live rollout...`);
@@ -428,22 +395,13 @@
         state.rl = rl;
         document.getElementById("sftScore").textContent = `${sft.on_pad_count}/${sft.attempts}`;
         document.getElementById("rlScore").textContent = `${rl.on_pad_count}/${rl.attempts}`;
-        updateMetricsForAttempt();
+        updateAllMetrics();
         const attached = await resumeActiveLiveJob();
         if (!attached) runLiveInference(state.nextModel);
       }
 
       buildPanels();
-      document.getElementById("prev").addEventListener("click", () => {
-        attemptInput.value = selectedAttempt() - 1;
-        updateMetricsForAttempt();
-      });
-      document.getElementById("next").addEventListener("click", () => {
-        attemptInput.value = selectedAttempt() + 1;
-        updateMetricsForAttempt();
-      });
-      attemptInput.addEventListener("input", updateMetricsForAttempt);
-      attemptInput.addEventListener("change", updateMetricsForAttempt);
+      updateAllMetrics();
       loadSummary();
     </script>
   </body>

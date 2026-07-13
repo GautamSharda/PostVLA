@@ -21,6 +21,7 @@ OPENPI_ROOT = POSTVLA_ROOT / "third_party" / "openpi"
 FLASHRT_ROOT = POSTVLA_ROOT / "third_party" / "FlashRT"
 DEMO_ROOT = POSTVLA_ROOT / "sim"
 EVAL_SCRIPT = POSTVLA_ROOT / "scripts" / "eval" / "eval_noise_control.py"
+DEFAULT_TASK_ID = 34
 
 SFT_PATH = os.environ.get(
     "POSTVLA_SFT_CKPT",
@@ -122,14 +123,6 @@ def read_json(path: Path) -> dict:
         return json.load(f)
 
 
-def selected_episode_id(model_key: str, attempt: int) -> int:
-    summary = read_json(MODELS[model_key]["summary"])
-    results = summary.get("results") or []
-    if attempt < 0 or attempt >= len(results):
-        raise ValueError(f"Attempt must be 0..{len(results) - 1}")
-    return int(results[attempt]["episode_id"])
-
-
 def tail_text(path: Path, max_chars: int = 6000) -> str:
     if not path.exists():
         return ""
@@ -153,28 +146,29 @@ def job_with_stream_progress(job: dict) -> dict:
     except Exception:
         return payload
     payload["stream_state"] = stream_state
-    payload["message"] = f"Streaming frame {stream_state.get('frame', 0)}..."
+    payload["message"] = (
+        f"Streaming task {payload['task_id']}, frame {stream_state.get('frame', 0)}..."
+    )
     return payload
 
 
 def run_job(job_id: str) -> None:
     job = JOBS[job_id]
     model_key = job["model"]
-    attempt = int(job["attempt"])
+    task_id = int(job["task_id"])
     out_dir = SITE_ROOT / "live_outputs" / job_id
     log_path = out_dir / "eval.log"
     try:
-        episode_id = selected_episode_id(model_key, attempt)
         out_dir.mkdir(parents=True, exist_ok=True)
         episode_file = out_dir / "episode_ids.json"
-        episode_file.write_text(json.dumps({"episode_ids": [episode_id]}) + "\n")
+        episode_file.write_text(json.dumps({"episode_ids": [task_id]}) + "\n")
 
         job.update(
             {
                 "state": "running",
-                "message": f"Loading {MODELS[model_key]['label']} for episode {episode_id}...",
+                "message": f"Loading {MODELS[model_key]['label']} for task {task_id}...",
                 "output_dir": str(out_dir),
-                "episode_id": episode_id,
+                "task_id": task_id,
                 "stream_url": stream_url(job_id),
                 "backend": MODELS[model_key]["backend"],
                 "label": MODELS[model_key]["label"],
@@ -243,7 +237,7 @@ def run_job(job_id: str) -> None:
         job.update(
             {
                 "state": "done",
-                "message": "Live rollout complete",
+                "message": f"Live rollout complete for task {task_id}",
                 "summary": summary,
                 "video_url": f"/live_outputs/{job_id}/videos/attempt_000.mp4?ts={int(time.time())}",
                 "stream_url": stream_url(job_id),
@@ -311,19 +305,21 @@ class Handler(SimpleHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", "0"))
             body = json.loads(self.rfile.read(length) or b"{}")
             model_key = str(body.get("model", "")).lower()
-            attempt = int(body.get("attempt", 0))
+            task_id = int(body.get("task_id", DEFAULT_TASK_ID))
             if model_key not in MODELS:
                 raise ValueError("model must be one of: " + ", ".join(MODELS))
+            if task_id < 0 or task_id >= 40:
+                raise ValueError("task_id must be 0..39")
             with JOB_LOCK:
                 running = [job for job in JOBS.values() if job.get("state") == "running"]
                 if running:
                     self._send_json(409, {"error": "another live inference is already running"})
                     return
-                job_id = f"{model_key}_attempt_{attempt:03d}_{int(time.time())}"
+                job_id = f"{model_key}_task_{task_id:03d}_{int(time.time())}"
                 JOBS[job_id] = {
                     "job_id": job_id,
                     "model": model_key,
-                    "attempt": attempt,
+                    "task_id": task_id,
                     "state": "running",
                     "message": "Queued",
                     "stream_url": stream_url(job_id),
