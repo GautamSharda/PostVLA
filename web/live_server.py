@@ -253,6 +253,8 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
+        self.send_header("Access-Control-Allow-Origin", "https://gautamsharda.com")
+        self.send_header("Vary", "Origin")
         self.end_headers()
         self.wfile.write(body)
 
